@@ -8,10 +8,10 @@ const jsonParser = express.json()
 
 const serializeNote = note => ({
   id: note.id,
-  title: xss(note.title),
+  name: xss(note.title),
   content: xss(note.content),
-  date_modified: note.date_modified,
-  folder_id: note.folder_id
+  modified: note.date_modified,
+  folderId: note.folder_id
 });
 
 NotesRouter.route('/')
@@ -21,8 +21,14 @@ NotesRouter.route('/')
     .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { title, content, folder_id } = req.body;
-    const newNoteInfo = { title, content, folder_id };
+    console.log('note:',req.body)
+    const { title, content, folder_id, date_modified } = req.body;
+    const newNoteInfo = { 
+      title: title, 
+      content: content, 
+      folder_id: folder_id, 
+      date_modified: date_modified, 
+    };
 
     if (title == null) {
       return res.status(400).json({error: {message: 'Note-title is missing'} });
@@ -31,7 +37,6 @@ NotesRouter.route('/')
       .then(note => {
         res.status(201)
         .location(path.posix.join(req.originalUrl +`/${note.id}`))
-        console.log(note)
         .json(serializeNote(note))
       })
       .catch(next)
@@ -39,6 +44,7 @@ NotesRouter.route('/')
 
   NotesRouter.route('/:note_id')
     .all((req, res, next) => {
+      console.log('param id', req.params.note_id)
       NotesService.getNoteById( req.app.get('db'), req.params.note_id )
         .then(note => {
           if(!note) { return res.status(404).json({error: {message: 'Note does not exist'} }) }

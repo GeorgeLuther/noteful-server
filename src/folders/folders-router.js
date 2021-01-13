@@ -1,4 +1,5 @@
 const { json } = require('express')
+const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const FoldersService = require('./folders-service')
@@ -16,12 +17,13 @@ FoldersRouter.route('/')
             .then(folders => { res.json(folders.map(serializeFolder))})
     })
     .post(jsonParser,(req,res,next)=>{
-        const { name } = req.body
-        
-        if(!name) {
+      console.log('new folder',req.body)
+        const { folder_name } = req.body
+        const newFolder = { folder_name }
+        if(!newFolder) {
             return res.status(400).json({error: {message: 'Folder must have a name'}})
         }
-        FoldersService.addFolder(req.app.get('db'), name)
+        FoldersService.addFolder(req.app.get('db'), newFolder)
             .then(folder => {
                 res.status(201)
                 .location(path.posix.join(req.originalUrl +`/${folder.id}`))
