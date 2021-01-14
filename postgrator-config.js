@@ -7,5 +7,6 @@ module.exports = {
   "connectionString": (process.env.NODE_ENV === 'test')
     ? process.env.TEST_DATABASE_URL
     : process.env.DATABASE_URL,
-    ssl: this.isProduction() ? { rejectUnauthorized: false } : false,
+    ssl: (process.env.NODE_ENV === 'production')
+      ? true: false,
 }
